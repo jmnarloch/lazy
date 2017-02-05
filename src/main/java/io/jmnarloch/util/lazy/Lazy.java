@@ -61,7 +61,12 @@ public interface Lazy<T> {
             if (isValueSet(value)) {
                 return (T) value;
             }
+            return initializeAndGet();
+        }
 
+        @SuppressWarnings("unchecked")
+        private T initializeAndGet() {
+            Object value;
             if (trySetValue()) {
                 setValue();
             }
