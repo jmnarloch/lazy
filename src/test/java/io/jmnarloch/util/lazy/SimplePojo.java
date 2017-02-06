@@ -18,6 +18,9 @@ package io.jmnarloch.util.lazy;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * A simple test object.
+ *
+ * @author Jakub Narloch
  */
 public class SimplePojo {
 

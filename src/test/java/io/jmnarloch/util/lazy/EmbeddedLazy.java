@@ -17,6 +17,13 @@ package io.jmnarloch.util.lazy;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A simple test object type with the embedded {@link Lazy} type.
+ *
+ * @param <T> the value type
+ *
+ * @author Jakub Narloch
+ */
 public class EmbeddedLazy<T> {
 
     private static final AtomicInteger INSTANCES = new AtomicInteger(0);

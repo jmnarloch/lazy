@@ -21,7 +21,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * Tests the {@link Lazy} class.
  *
+ * @author Jakub Narloch
  */
 public class LazyTest {
 
