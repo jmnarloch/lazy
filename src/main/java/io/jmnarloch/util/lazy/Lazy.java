@@ -103,7 +103,7 @@ public interface Lazy<T> {
         @SuppressWarnings("unchecked")
         @Override
         public T get() {
-            Object value = getValue();
+            final Object value = getValue();
             checkError(value);
             if (isValueSet(value)) {
                 return (T) value;
@@ -113,12 +113,10 @@ public interface Lazy<T> {
 
         @SuppressWarnings("unchecked")
         private T initializeAndGet() {
-            Object value;
             if (trySetValue()) {
                 setValue();
             }
-
-            value = waitForValue();
+            final Object value = waitForValue();
             checkError(value);
             return (T) value;
         }
