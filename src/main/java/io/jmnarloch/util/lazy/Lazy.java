@@ -23,12 +23,12 @@ import java.util.function.Supplier;
 /**
  * A lazy reference to a object instance.
  *
- * <p />
+ * <p>
  *
  * The instance of the object will be supplied by the {@link Supplier} instance and initialized on the first execution
  * of {@link #get()}. The initialization is guaranteed to performed only once.
  *
- * <p />
+ * <p>
  *
  * In case of any error whenever the provided returns a {@code null} or throws a exception a
  * {@link IllegalStateException} will throw. Any consecutive call to {@link #get()} will throw
@@ -43,7 +43,7 @@ public interface Lazy<T> {
     /**
      * Retrieves the object instance.
      *
-     * <p />
+     * <p>
      *
      * If the value hasn't been initialized previously it will initialized upon first execution.
      *
