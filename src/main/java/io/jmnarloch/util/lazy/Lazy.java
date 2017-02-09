@@ -16,7 +16,7 @@
 package io.jmnarloch.util.lazy;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -92,9 +92,12 @@ public interface Lazy<T> {
 
         private static final Object ERROR = new Object();
 
+        private static final AtomicReferenceFieldUpdater<LockFreeLazy, Object> instanceUpdater =
+                AtomicReferenceFieldUpdater.newUpdater(LockFreeLazy.class, Object.class, "instance");
+
         private final Supplier<T> supplier;
 
-        private final AtomicReference instance = new AtomicReference();
+        private volatile Object instance;
 
         LockFreeLazy(Supplier<T> supplier) {
             this.supplier = supplier;
@@ -127,7 +130,7 @@ public interface Lazy<T> {
 
         @SuppressWarnings("unchecked")
         private boolean trySetValue() {
-            return instance.compareAndSet(null, INITIALIZING);
+            return instanceUpdater.compareAndSet(this, null, INITIALIZING);
         }
 
         @SuppressWarnings("unchecked")
@@ -137,15 +140,15 @@ public interface Lazy<T> {
                 if (Objects.isNull(newValue)) {
                     throw new IllegalStateException("Supplier failed to provide the value");
                 }
-                instance.set(newValue);
+                instanceUpdater.set(this, newValue);
             } catch (Exception ex) {
-                instance.set(ERROR);
+                instanceUpdater.set(this, ERROR);
                 throw new IllegalStateException("Failed to initialize the lazy instance", ex);
             }
         }
 
         private Object getValue() {
-            return instance.get();
+            return instance;
         }
 
         private Object waitForValue() {
