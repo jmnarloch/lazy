@@ -38,8 +38,8 @@ variant whenever it uses the `synchronized` Java keyword or directly `Lock` type
 
 | Benchmark | Mode | Cnt | Score | Error | Units |
 | --------- | ---- | --- | ----- | ----- | ----- |
-| LazyBenchmark.benchmarkGet | thrpt | 20 | 271440905,189 ± 2721909,603 | ops/s |
-| LazyBenchmark.benchmarkInitializeAndGet | thrpt | 20 | 274012023,081 ± 1720484,338 | ops/s |
+| LazyBenchmark.benchmarkGet | thrpt | 20 | 271440905,189 | ± 2721909,603 | ops/s |
+| LazyBenchmark.benchmarkInitializeAndGet | thrpt | 20 | 274012023,081 | ± 1720484,338 | ops/s |
 
 ## License
 
