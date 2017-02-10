@@ -15,8 +15,6 @@
  */
 package io.jmnarloch.util.lazy;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -35,6 +33,8 @@ import java.util.function.Supplier;
  * {@link IllegalStateException} as well.
  *
  * Thread safety: The implementation is thread safe.
+ *
+ * @param <T> the instance type
  *
  * @author Jakub Narloch
  */
@@ -55,7 +55,7 @@ public interface Lazy<T> {
      * Applies the mapping function to the value.
      *
      * @param map the mapping function
-     * @param <U> The result type
+     * @param <U> the result type
      * @return new lazy evaluated expression
      */
     default <U> Lazy<U> map(Function<T, U> map) {
@@ -66,7 +66,7 @@ public interface Lazy<T> {
      * Applies the mapping function to the resulted {@link Lazy} value.
      *
      * @param map the mapping function
-     * @param <U> The result type
+     * @param <U> the result type
      * @return new lazy evaluated expression
      */
     default <U> Lazy<U> flatMap(Function<T, Lazy<U>> map) {
@@ -84,85 +84,5 @@ public interface Lazy<T> {
      */
     static <T> Lazy<T> create(Supplier<T> supplier) {
         return new LockFreeLazy<>(supplier);
-    }
-
-    class LockFreeLazy<T> implements Lazy<T> {
-
-        private static final Object INITIALIZING = new Object();
-
-        private static final Object ERROR = new Object();
-
-        private static final AtomicReferenceFieldUpdater<LockFreeLazy, Object> instanceUpdater =
-                AtomicReferenceFieldUpdater.newUpdater(LockFreeLazy.class, Object.class, "instance");
-
-        private final Supplier<T> supplier;
-
-        private volatile Object instance;
-
-        LockFreeLazy(Supplier<T> supplier) {
-            this.supplier = supplier;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public T get() {
-            final Object value = getValue();
-            checkError(value);
-            if (isValueSet(value)) {
-                return (T) value;
-            }
-            return initializeAndGet();
-        }
-
-        @SuppressWarnings("unchecked")
-        private T initializeAndGet() {
-            if (trySetValue()) {
-                setValue();
-            }
-            final Object value = waitForValue();
-            checkError(value);
-            return (T) value;
-        }
-
-        private boolean isValueSet(Object value) {
-            return Objects.nonNull(value) && value != INITIALIZING && value != ERROR;
-        }
-
-        @SuppressWarnings("unchecked")
-        private boolean trySetValue() {
-            return instanceUpdater.compareAndSet(this, null, INITIALIZING);
-        }
-
-        @SuppressWarnings("unchecked")
-        private void setValue() {
-            try {
-                T newValue = supplier.get();
-                if (Objects.isNull(newValue)) {
-                    throw new IllegalStateException("Supplier failed to provide the value");
-                }
-                instanceUpdater.set(this, newValue);
-            } catch (Exception ex) {
-                instanceUpdater.set(this, ERROR);
-                throw new IllegalStateException("Failed to initialize the lazy instance", ex);
-            }
-        }
-
-        private Object getValue() {
-            return instance;
-        }
-
-        private Object waitForValue() {
-            Object value;
-            do {
-                value = getValue();
-            } while (value == INITIALIZING);
-            return value;
-        }
-
-        private void checkError(Object value) {
-            if (value == ERROR) {
-                throw new IllegalStateException("Supplier failed to initialize the value");
-            }
-        }
     }
 }
